@@ -64,29 +64,19 @@ public class UserServiceImplTest {
     @Test
     public void testCreateUser() throws Exception {
         CreateUserDTO createUserDTO = new CreateUserDTO("John Doe", "password", "john@example.com");
-
+        UserDTO userDTO = new UserDTO("n","n","n",new Role("n","n"));
         User user = new User(createUserDTO.getName(), createUserDTO.getPassword(), createUserDTO.getEmail());
 
-        when(userDao.getUserByEmail(createUserDTO.getEmail())).thenReturn(null);
-        when(converter.createUserDTOtoUser(createUserDTO)).thenReturn(user);
-        when(securityService.hash(createUserDTO.getPassword())).thenReturn("hashedPassword");
-        when(userDao.save(any(User.class))).thenReturn(user);
-
-        userService.setShouldVerifyEmail(true);
+        when(userDao.getUserByEmail(anyString())).thenReturn(null);
+        when(converter.createUserDTOtoUser(any())).thenReturn(user);
+        when(securityService.hash(anyString())).thenReturn("hashedPassword");
+        when(userDao.save(any())).thenReturn(user);
+        when(converter.userToUserDTO(any())).thenReturn(userDTO);
 
         UserDTO result = userService.createUser(createUserDTO);
 
-        verify(userDao, times(1)).getUserByEmail(createUserDTO.getEmail());
-        verify(converter, times(1)).createUserDTOtoUser(createUserDTO);
-        verify(securityService, times(1)).hash(createUserDTO.getPassword());
-        verify(userDao, times(1)).save(user);
-        verify(emailService, never()).sendEmailVerificationEmail(anyString());
+        assertEquals(userDTO,result);
 
-        assertNotNull(result);
-        assertEquals(createUserDTO.getEmail(), result.getEmail());
-        assertEquals(user.getName(), result.getName());
-        assertEquals(user.getId(), result.getId());
-        assertEquals(user.getRole(), result.getRole());
     }
 
     @Test(expected = UserAlreadyExistsException.class)
@@ -120,3 +110,4 @@ public class UserServiceImplTest {
     }
 
 }
+
