@@ -15,8 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import it.unical.ingsw.dao.UserDao;
 import it.unical.ingsw.dto.CreateUserDTO;
@@ -43,6 +42,9 @@ public class UserServiceImplTest {
 
     @InjectMocks
     private UserServiceImpl userService;
+
+    @Mock
+    private UserDTO userDTO;
 
     @Before
     public void setUp() {
@@ -108,6 +110,54 @@ public class UserServiceImplTest {
         assertEquals(userEmail, result.getEmail());
         assertEquals("John Doe", result.getName());
     }
+
+    @Test
+    public void finduserbyemailTest()
+    {
+        User us = new User("n","n","n");
+        UserDTO userDTO = new UserDTO("n","n","n",new Role("n","n"));
+        when(userDao.getUserByEmail(anyString())).thenReturn(us);
+        when(converter.userToUserDTO(any())).thenReturn(userDTO);
+
+        UserDTO userDTO1 = userService.findUserByEmail(userDTO.getEmail());
+
+        assertEquals(userDTO,userDTO1);
+    }
+
+    @Test
+    public void cuTestC()
+    {
+        userDao.getUserByEmail(anyString());
+        converter.createUserDTOtoUser(any());
+
+        verify(userDao,times(1)).getUserByEmail(anyString());
+        verify(converter,times(1)).createUserDTOtoUser(any());
+    }
+
+    @Test
+    public void ex() throws Exception {
+        //when(securityService.hash(anyString())).thenThrow(Exception.class);
+        doThrow(Exception.class).when(securityService).hash(anyString());
+
+
+        Exception Ex = assertThrows(Exception.class, () -> {
+            securityService.hash(anyString());
+        });
+
+        assertNotNull(Ex);
+
+    }
+
+    @Test
+    public void getTest()
+    {
+        doThrow(RuntimeException.class).when(userDTO).getName();
+
+        Exception ex = assertThrows(RuntimeException.class, ()-> {userDTO.getName();} );
+
+        assertNotNull(ex);
+    }
+
 
 }
 
